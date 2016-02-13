@@ -1,0 +1,43 @@
+diff -ur bibutils_5.6/lib/bibtexout.c bibutils_5.6-patched/lib/bibtexout.c
+--- bibutils_5.6/lib/bibtexout.c	2015-01-27 07:28:50.000000000 +1100
++++ bibutils_5.6-patched/lib/bibtexout.c	2016-02-12 12:48:51.486224965 +1100
+@@ -115,6 +115,8 @@
+ 			else type = TYPE_INCOLLECTION;
+ 		} else if ( !strcasecmp( genre, "report" ) )
+ 			type = TYPE_REPORT;
++		else if ( !strcasecmp( genre, "book chapter" ) )
++			type = TYPE_INBOOK;
+ 		else if ( !strcasecmp( genre, "book" ) ) {
+ 			if ( level==0 ) type=TYPE_BOOK;
+ 			else type=TYPE_INBOOK;
+@@ -132,7 +134,7 @@
+ 			if ( strcasecmp( info->tag[i].data, "ISSUANCE" ) ) continue;
+ 			if ( !strcasecmp( info->data[i].data, "monographic" ) ) {
+ 				if ( info->level[i]==0 ) type = TYPE_BOOK;
+-				else if ( info->level[i]==1 ) type=TYPE_INBOOK;
++				else if ( info->level[i]==1 ) type=TYPE_MISC;
+ 			}
+ 		}
+ 	}
+@@ -140,7 +142,7 @@
+ 	/* default to BOOK type */
+ 	if ( type==TYPE_UNKNOWN ) {
+ 		maxlevel = fields_maxlevel( info );
+-		if ( maxlevel > 0 ) type = TYPE_INBOOK;
++		if ( maxlevel > 0 ) type = TYPE_MISC;
+ 		else {
+ 			if ( p->progname ) fprintf( stderr, "%s: ", p->progname );
+ 			fprintf( stderr, "Cannot identify TYPE "
+diff -ur bibutils_5.6/lib/modsin.c bibutils_5.6-patched/lib/modsin.c
+--- bibutils_5.6/lib/modsin.c	2015-01-27 07:28:50.000000000 +1100
++++ bibutils_5.6-patched/lib/modsin.c	2016-02-12 12:50:53.141317937 +1100
+@@ -941,7 +941,8 @@
+ 		else if ( xml_tagexact( node, "physicalDescription" ) )
+ 			status = modsin_description( node, info, level );
+ 		else if ( xml_tag_attrib( node, "relatedItem", "type", "host" ) ||
+-			  xml_tag_attrib( node, "relatedItem", "type", "series" ) ) {
++			  xml_tag_attrib( node, "relatedItem", "type", "series" ) ||
++			  xml_tag_attrib( node, "relatedItem", "type", "original" ) ) {
+ 			if ( node->down ) status = modsin_mods( node->down, info, level+1 );
+ 		}
+ 		if ( status!=BIBL_OK ) return status;
